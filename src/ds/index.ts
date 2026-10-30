@@ -8,10 +8,13 @@ export { default as CssBaseline } from "@mui/material/CssBaseline";
 
 // Kit components
 export { default as AppBanner } from "../components/AppBanner";
+export { default as NavBar } from "../components/NavBar";
 
 // MUI primitives used by the screens
 export { default as AppBar } from "@mui/material/AppBar";
 export { default as Toolbar } from "@mui/material/Toolbar";
+export { default as Tabs } from "@mui/material/Tabs";
+export { default as Tab } from "@mui/material/Tab";
 export { default as Box } from "@mui/material/Box";
 export { default as Container } from "@mui/material/Container";
 export { default as Stack } from "@mui/material/Stack";

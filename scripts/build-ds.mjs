@@ -61,6 +61,42 @@ const reactGlobalsPlugin = {
   },
 };
 
+/**
+ * The kit bundle runs outside Next.js: `next/link` becomes a plain anchor and
+ * `usePathname` reads the page's own location.
+ */
+const nextShimPlugin = {
+  name: "next-shims",
+  setup(build) {
+    build.onResolve({ filter: /^next\/(link|navigation)$/ }, (args) => ({
+      path: args.path,
+      namespace: "next-shims",
+    }));
+    build.onLoad({ filter: /.*/, namespace: "next-shims" }, (args) => {
+      if (args.path === "next/link") {
+        return {
+          contents: `
+            const React = window.React;
+            const Link = React.forwardRef(function Link({ href, children, ...rest }, ref) {
+              return React.createElement("a", { ...rest, href: typeof href === "string" ? href : String(href), ref }, children);
+            });
+            export default Link;
+          `,
+          loader: "js",
+        };
+      }
+      return {
+        contents: `
+          export function usePathname() {
+            return typeof window === "undefined" ? "/" : window.location.pathname;
+          }
+        `,
+        loader: "js",
+      };
+    });
+  },
+};
+
 await rm("dist/ds", { recursive: true, force: true });
 
 await build({
@@ -80,7 +116,7 @@ await build({
   define: { "process.env.NODE_ENV": '"production"' },
   loader: { ".woff2": "file" },
   assetNames: "fonts/[name]",
-  plugins: [geistFontsPlugin, reactGlobalsPlugin],
+  plugins: [geistFontsPlugin, reactGlobalsPlugin, nextShimPlugin],
   footer: { js: "window.SmartMailAssistant = SmartMailAssistant;" },
   logLevel: "info",
 });
